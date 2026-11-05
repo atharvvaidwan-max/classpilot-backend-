@@ -17,7 +17,6 @@ const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5500")
 
 app.use(cors({
   origin(origin, callback) {
-    // Requests without an Origin header include health checks and server-to-server calls.
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
@@ -47,7 +46,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Readiness is separate from liveness: it verifies the configured database connection.
 app.get("/api/health/ready", async (req, res) => {
   if (!process.env.DATABASE_URL) {
     return res.status(503).json({
@@ -57,7 +55,7 @@ app.get("/api/health/ready", async (req, res) => {
   }
 
   try {
-    await prisma.$queryRaw\`SELECT 1\`;
+    await prisma.$queryRawUnsafe("SELECT 1");
     return res.status(200).json({
       success: true,
       message: "Backend and database are ready"
