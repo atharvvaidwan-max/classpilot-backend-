@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  syntax:
+  syntax-and-schema:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -16,5 +16,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Install dependencies
+        run: npm install
       - name: Check JavaScript syntax
-        run: node --check src/server.js
+        run: npm run check
+      - name: Validate Prisma schema
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/classpilot?schema=public
+        run: npm run db:validate
+      - name: Generate Prisma client
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/classpilot?schema=public
+        run: npm run db:generate
